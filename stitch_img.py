@@ -10,25 +10,27 @@ import os,re
 import time
 from reportlab.lib.units import inch
 
-def img_search(mypath,filenames):
+def img_search(mypath, filenames):
     for lists in os.listdir(mypath):
         path = os.path.join(mypath,lists)
         if os.path.isfile(path):
             expression = r'[\w]+\.(jpg|png|jpeg)$'
-            if re.search(expression,path,re.IGNORECASE):
+            if re.search(expression, path, re.IGNORECASE):
                 filenames.append(path)
         elif os.path.isdir(path):
-            img_search(path,filenames)
+            img_search(path, filenames)
 
-def img_search1(mypath,filenames):
+
+def img_search1(mypath, filenames):
     for lists in os.listdir(mypath):
         path = os.path.join(mypath,lists)
         if os.path.isfile(path):
             a = path.split('.')
-            if a[-1] in ['jpg','png','JPEG']:
+            if a[-1] in ['jpg', 'png', 'JPEG']:
                 filenames.append(path)
         elif os.path.isdir(path):
             img_search1(path,filenames)
+
 
 def rotate_img_to_proper(image):
     try:
@@ -54,21 +56,23 @@ def rotate_img_to_proper(image):
         pass
     return image
 
-def main():
+
+def main(src_folder=None):
     output_file_name = 'out.pdf'
-    save_file_name = 'ex.pdf'
+    #save_file_name = 'ex.pdf'
     #doc = SimpleDocTemplate(save_file_name, pagesize=A1,
     #                     rightMargin=72, leftMargin=72,
     #                     topMargin=72, bottomMargin=18)
     imgDoc = canvas.Canvas(output_file_name)#pagesize=letter
     imgDoc.setPageSize(A4)
     document_width,document_height = A4
-    mypath = input('Input the image folder please:')
+    if src_folder is None: mypath = input('Input the image folder please:')
+    else: mypath = src_folder
     filenames=[]
     start = time.clock()
-    img_search(mypath,filenames)
+    img_search(mypath, filenames)
     end = time.clock()
-    print('run time: ', end-start,'find: ',len(filenames))
+    print('find file cost time: ', end-start, 'find files: ', len(filenames))
     # for f in filenames:
     #     print(f)
     for image in filenames:
@@ -76,8 +80,8 @@ def main():
             image_file = PIL.Image.open(image)
             image_file = rotate_img_to_proper(image_file)
 
-            image_width,image_height = image_file.size
-            print(image_file.size)
+            image_width, image_height = image_file.size
+            print('img size:', image_file.size)
             if not(image_width>0 and image_height>0):
                 raise Exception
             image_aspect = image_height/float(image_width)
@@ -89,13 +93,11 @@ def main():
                              height=print_height,preserveAspectRatio=True)
             #inform the reportlab we want a new page
             imgDoc.showPage()
-            imgDoc.save()
         except Exception as e:
             print('error:',e,image)
+    imgDoc.save()
     print('Done')
-# story=[]
-# #story.append('1.jpg')
-# story.append(Image('1.jpg'),preserveAspectRatio=True)
-# doc.build(story)
+
+
 if __name__ == '__main__':
-    main();
+    main(src_folder=None);
